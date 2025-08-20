@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Vue Transition Builder | Create & Visualize Animate.css Transitions</title>
+    <meta name="description" content="Easily build, visualize, and generate code for Vue.js transitions using the full Animate.css library. Select enter/leave animations, speed, and delay to create smooth user experiences.">
+    <meta name="keywords" content="Vue transitions, Vue.js, Animate.css, transition builder, web animation, frontend development, interactive tool">
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Animate.css CDN -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <style>
+        /* Inter Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <main id="app" class="w-full max-w-5xl p-4 md:p-8 bg-white rounded-2xl shadow-lg space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Vue Transition Builder</h1>
+            <p class="text-gray-600 mt-2">Using <a href="https://animate.style/" target="_blank" rel="noopener noreferrer" aria-label="Animate.css official website" class="text-indigo-600 hover:underline">Animate.css</a> utility classes.</p>
+        </header>
+
+        <section aria-labelledby="intro-heading">
+             <h2 id="intro-heading" class="sr-only">Introduction</h2>
+             <p class="text-center text-gray-700 max-w-3xl mx-auto">Smooth transitions can significantly improve user experience by guiding the user's attention and creating a more polished feel. This tool helps you experiment with different animations from the Animate.css library to find the perfect enter and leave transitions for your Vue.js components.</p>
+        </section>
+
+        <section aria-labelledby="controls-heading">
+            <h2 id="controls-heading" class="sr-only">Transition Controls</h2>
+            <!-- Global Controls -->
+            <div>
+                <label for="mode-select" class="block text-sm font-medium text-gray-700 mb-2">Transition Mode</label>
+                <select id="mode-select" v-model="selectedMode" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Default</option>
+                    <option value="in-out">in-out</option>
+                    <option value="out-in">out-in</option>
+                </select>
+            </div>
+
+            <!-- Animation Controls Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                
+                <!-- Leave Controls -->
+                <div class="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                    <h3 class="font-semibold text-lg text-gray-800">Leave Transition</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Animation</label>
+                        <select v-model="leaveAnimation" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                             <optgroup v-for="group in leaveAnimations" :key="group.label" :label="group.label">
+                                <option v-for="option in group.options" :key="option" :value="option">{{ option }}</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Speed</label>
+                            <select v-model="leaveSpeed" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <option value="">Default</option>
+                                <option value="animate__slow">Slow</option>
+                                <option value="animate__slower">Slower</option>
+                                <option value="animate__fast">Fast</option>
+                                <option value="animate__faster">Faster</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Delay</label>
+                            <select v-model="leaveDelay" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <option value="">None</option>
+                                <option value="animate__delay-2s">2s</option>
+                                <option value="animate__delay-3s">3s</option>
+                                <option value="animate__delay-4s">4s</option>
+                                <option value="animate__delay-5s">5s</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enter Controls -->
+                <div class="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                    <h3 class="font-semibold text-lg text-gray-800">Enter Transition</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Animation</label>
+                        <select v-model="enterAnimation" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                            <optgroup v-for="group in enterAnimations" :key="group.label" :label="group.label">
+                                <option v-for="option in group.options" :key="option" :value="option">{{ option }}</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Speed</label>
+                             <select v-model="enterSpeed" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <option value="">Default</option>
+                                <option value="animate__slow">Slow</option>
+                                <option value="animate__slower">Slower</option>
+                                <option value="animate__fast">Fast</option>
+                                <option value="animate__faster">Faster</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Delay</label>
+                            <select v-model="enterDelay" class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <option value="">None</option>
+                                <option value="animate__delay-2s">2s</option>
+                                <option value="animate__delay-3s">3s</option>
+                                <option value="animate__delay-4s">4s</option>
+                                <option value="animate__delay-5s">5s</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section aria-labelledby="visualization-heading">
+            <h2 id="visualization-heading" class="sr-only">Live Preview</h2>
+            <!-- Visualization Section -->
+            <div class="relative h-64 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
+                <Transition 
+                    :mode="selectedMode" 
+                    :enter-active-class="enterClasses"
+                    :leave-active-class="leaveClasses"
+                >
+                    <div v-if="show" key="box1" class="absolute w-48 h-48 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                        Box A
+                    </div>
+                    <div v-else key="box2" class="absolute w-48 h-48 bg-teal-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                        Box B
+                    </div>
+                </Transition>
+            </div>
+
+            <!-- Action Button -->
+            <div class="text-center mt-6">
+                <button @click="show = !show" class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                    Toggle Transition
+                </button>
+            </div>
+        </section>
+
+        <section aria-labelledby="code-heading">
+            <!-- Code Visualization -->
+            <div class="space-y-4">
+                <div class="relative flex justify-between items-center">
+                    <h2 id="code-heading" class="text-2xl font-bold text-gray-900">Generated Code</h2>
+                    <button @click="copyCode" class="px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        {{ copyButtonText }}
+                    </button>
+                </div>
+                <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto"><code ref="codeBlock">{{ generatedCode }}</code></pre>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                // --- STATE ---
+                const show = ref(true);
+                const copyButtonText = ref('Copy Code');
+                const selectedMode = ref('out-in');
+                const codeBlock = ref(null);
+
+                // Enter state
+                const enterAnimation = ref('bounceIn');
+                const enterSpeed = ref('');
+                const enterDelay = ref('');
+
+                // Leave state
+                const leaveAnimation = ref('bounceOut');
+                const leaveSpeed = ref('');
+                const leaveDelay = ref('');
+
+                // --- DATA: ANIMATIONS FROM ANIMATE.CSS (FILTERED) ---
+                const enterAnimations = ref([
+                    { label: 'Attention Seekers', options: ['bounce', 'flash', 'pulse', 'rubberBand', 'shakeX', 'shakeY', 'headShake', 'swing', 'tada', 'wobble', 'jello', 'heartBeat'] },
+                    { label: 'Back Entrances', options: ['backInDown', 'backInLeft', 'backInRight', 'backInUp'] },
+                    { label: 'Bouncing Entrances', options: ['bounceIn', 'bounceInDown', 'bounceInLeft', 'bounceInRight', 'bounceInUp'] },
+                    { label: 'Fading Entrances', options: ['fadeIn', 'fadeInDown', 'fadeInDownBig', 'fadeInLeft', 'fadeInLeftBig', 'fadeInRight', 'fadeInRightBig', 'fadeInUp', 'fadeInUpBig', 'fadeInTopLeft', 'fadeInTopRight', 'fadeInBottomLeft', 'fadeInBottomRight'] },
+                    { label: 'Flippers', options: ['flip', 'flipInX', 'flipInY'] },
+                    { label: 'Lightspeed', options: ['lightSpeedInRight', 'lightSpeedInLeft'] },
+                    { label: 'Rotating Entrances', options: ['rotateIn', 'rotateInDownLeft', 'rotateInDownRight', 'rotateInUpLeft', 'rotateInUpRight'] },
+                    { label: 'Specials', options: ['jackInTheBox', 'rollIn'] },
+                    { label: 'Zooming Entrances', options: ['zoomIn', 'zoomInDown', 'zoomInLeft', 'zoomInRight', 'zoomInUp'] },
+                    { label: 'Sliding Entrances', options: ['slideInDown', 'slideInLeft', 'slideInRight', 'slideInUp'] }
+                ]);
+
+                const leaveAnimations = ref([
+                    { label: 'Attention Seekers', options: ['bounce', 'flash', 'pulse', 'rubberBand', 'shakeX', 'shakeY', 'headShake', 'swing', 'tada', 'wobble', 'jello', 'heartBeat'] },
+                    { label: 'Back Exits', options: ['backOutDown', 'backOutLeft', 'backOutRight', 'backOutUp'] },
+                    { label: 'Bouncing Exits', options: ['bounceOut', 'bounceOutDown', 'bounceOutLeft', 'bounceOutRight', 'bounceOutUp'] },
+                    { label: 'Fading Exits', options: ['fadeOut', 'fadeOutDown', 'fadeOutDownBig', 'fadeOutLeft', 'fadeOutLeftBig', 'fadeOutRight', 'fadeOutRightBig', 'fadeOutUp', 'fadeOutUpBig', 'fadeOutTopLeft', 'fadeOutTopRight', 'fadeOutBottomRight', 'fadeOutBottomLeft'] },
+                    { label: 'Flippers', options: ['flip', 'flipOutX', 'flipOutY'] },
+                    { label: 'Lightspeed', options: ['lightSpeedOutRight', 'lightSpeedOutLeft'] },
+                    { label: 'Rotating Exits', options: ['rotateOut', 'rotateOutDownLeft', 'rotateOutDownRight', 'rotateOutUpLeft', 'rotateOutUpRight'] },
+                    { label: 'Specials', options: ['hinge', 'rollOut'] },
+                    { label: 'Zooming Exits', options: ['zoomOut', 'zoomOutDown', 'zoomOutLeft', 'zoomOutRight', 'zoomOutUp'] },
+                    { label: 'Sliding Exits', options: ['slideOutDown', 'slideOutLeft', 'slideOutRight', 'slideOutUp'] }
+                ]);
+
+                // --- COMPUTED PROPERTIES TO BUILD CLASS STRINGS ---
+                const enterClasses = computed(() => {
+                    return `animate__animated animate__${enterAnimation.value} ${enterSpeed.value} ${enterDelay.value}`.trim();
+                });
+
+                const leaveClasses = computed(() => {
+                    return `animate__animated animate__${leaveAnimation.value} ${leaveSpeed.value} ${leaveDelay.value}`.trim();
+                });
+
+                const generatedCode = computed(() => {
+                    return `<!-- 
+  NOTE: This code requires Animate.css to be installed in your project.
+  See usage instructions: https://animate.style/#usage
+-->
+
+<Transition 
+    mode="${selectedMode.value}" 
+    enter-active-class="${enterClasses.value}"
+    leave-active-class="${leaveClasses.value}"
+>
+    <div v-if="show">...</div>
+    <div v-else>...</div>
+</Transition>
+`;
+                });
+
+                // --- METHODS: COPY TO CLIPBOARD ---
+                const copyCode = () => {
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(generatedCode.value).then(() => {
+                            copyButtonText.value = 'Copied!';
+                            setTimeout(() => { copyButtonText.value = 'Copy Code'; }, 2000);
+                        }, () => {
+                            copyButtonText.value = 'Failed!';
+                        });
+                    } else { // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = generatedCode.value;
+                        textArea.style.position = 'absolute';
+                        textArea.style.left = '-9999px';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            copyButtonText.value = 'Copied!';
+                            setTimeout(() => { copyButtonText.value = 'Copy Code'; }, 2000);
+                        } catch (err) {
+                            copyButtonText.value = 'Failed!';
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                };
+                
+                return {
+                    show,
+                    selectedMode,
+                    enterAnimation, enterSpeed, enterDelay,
+                    leaveAnimation, leaveSpeed, leaveDelay,
+                    enterAnimations, leaveAnimations,
+                    enterClasses, leaveClasses,
+                    generatedCode,
+                    codeBlock,
+                    copyCode, copyButtonText,
+                };
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+</html>
